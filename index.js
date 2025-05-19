@@ -2,12 +2,14 @@ import express from 'express';
 import axios from 'axios';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 dotenv.config();
 const app = express();
+app.use(cors());
 app.use(express.json());
 
-// Função para hash SHA-256
+// Função para hash SHA-256 exigido pelo Meta
 function hashSHA256(value) {
   return crypto.createHash('sha256').update(value.trim().toLowerCase()).digest('hex');
 }
@@ -15,7 +17,7 @@ function hashSHA256(value) {
 app.post('/purchase', async (req, res) => {
   const { email, phone, value, currency, fbc, fbp, ip, userAgent, url } = req.body;
 
-  const pixelId = '1764411377804246'; // seu Pixel
+  const pixelId = '1764411377804246';
   const token = process.env.META_TOKEN;
 
   const payload = {
@@ -47,6 +49,7 @@ app.post('/purchase', async (req, res) => {
       payload,
       { params: { access_token: token } }
     );
+
     res.json({ success: true, fb_response: response.data });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
